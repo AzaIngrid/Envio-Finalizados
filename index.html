@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Finalizados · iGreen Energy</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:#f5f7f5;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;}
+.app{width:100%;max-width:680px;}
+.top-bar{background:#005227;border-radius:16px 16px 0 0;padding:20px 28px;display:flex;align-items:center;gap:14px;}
+.logo-dot{width:38px;height:38px;background:#00C93B;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#005227;flex-shrink:0;}
+.top-bar-info h1{font-size:16px;font-weight:700;color:#fff;margin:0;}
+.top-bar-info span{font-size:11px;color:#7aca8f;}
+.top-bar-back{margin-left:auto;background:rgba(255,255,255,0.12);border:none;border-radius:8px;color:#fff;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;display:none;transition:background .15s;}
+.top-bar-back:hover{background:rgba(255,255,255,0.22);}
+.body{background:#fff;border:0.5px solid #e0e5e0;border-top:none;border-radius:0 0 16px 16px;padding:28px;min-height:360px;}
+.screen{display:none;}.screen.active{display:block;}
+.select-title{font-size:13px;font-weight:600;color:#666;margin-bottom:18px;}
+.forn-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.forn-card{background:#f5f7f5;border:0.5px solid #dde3dd;border-radius:10px;padding:16px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:12px;}
+.forn-card:hover{border-color:#00C93B;background:#f0faf3;}
+.forn-card.disabled{opacity:0.4;cursor:not-allowed;pointer-events:none;}
+.forn-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+.forn-name{font-size:13px;font-weight:700;color:#1a2e1f;}
+.forn-sub{font-size:11px;color:#666;margin-top:2px;}
+.badge-soon{font-size:9px;font-weight:700;background:#e2f6e8;color:#005227;border-radius:4px;padding:2px 6px;margin-left:5px;}
+.badge-ok{font-size:9px;font-weight:700;background:#00C93B;color:#003a1c;border-radius:4px;padding:2px 6px;margin-left:5px;}
+.section-label{font-size:11px;font-weight:700;color:#00C93B;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+.drop-zone{border:1.5px dashed #00C93B;border-radius:10px;background:#f0faf3;padding:24px 20px;text-align:center;cursor:pointer;transition:background .15s;position:relative;}
+.drop-zone:hover{background:#e2f6e8;}
+.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.drop-icon{font-size:26px;margin-bottom:6px;}
+.drop-text{font-size:13px;font-weight:600;color:#005227;}
+.drop-sub{font-size:11px;color:#666;margin-top:3px;}
+.file-ok{font-size:12px;color:#005227;font-weight:600;margin-top:7px;}
+.param-item{display:flex;flex-direction:column;gap:5px;}
+.param-hint{font-size:10px;color:#888;margin-top:1px;}
+.param-item input{font-family:'Montserrat',sans-serif;font-size:13px;padding:9px 12px;border-radius:8px;border:0.5px solid #ccd4cc;background:#fff;color:#1a2e1f;outline:none;transition:border-color .15s;}
+.param-item input:focus{border-color:#00C93B;}
+.toggle-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.toggle{width:38px;height:22px;background:#ccd4cc;border-radius:11px;position:relative;cursor:pointer;border:none;outline:none;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:#00C93B;}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:white;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{left:19px;}
+.toggle-label{font-size:13px;color:#1a2e1f;font-weight:500;}
+.rules-box{background:#f5f7f5;border:0.5px solid #dde3dd;border-radius:10px;padding:14px 16px;}
+.rules-title{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.rule-row{font-size:12px;color:#555;margin-bottom:5px;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap;}
+.tag{background:#e2f6e8;color:#005227;border-radius:4px;padding:2px 7px;font-weight:600;font-size:11px;white-space:nowrap;}
+.tag.gd{background:#dbeafe;color:#1e40af;}
+.btn-run{display:block;width:100%;margin-top:24px;padding:14px;background:#00C93B;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;color:#003a1c;cursor:pointer;transition:background .15s,transform .1s;}
+.btn-run:hover{background:#00b534;}.btn-run:active{transform:scale(.98);}
+.btn-run:disabled{background:#dde3dd;color:#999;cursor:not-allowed;transform:none;}
+.status-box{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;display:none;}
+.status-box.info{background:#e2f6e8;color:#005227;border:0.5px solid #a3ddb4;display:block;}
+.status-box.error{background:#fef2f2;color:#7f1d1d;border:0.5px solid #fca5a5;display:block;}
+.result-card{background:#f5f7f5;border:0.5px solid #dde3dd;border-radius:10px;padding:16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.rc-title{font-size:13px;font-weight:600;color:#1a2e1f;}
+.rc-sub{font-size:11px;color:#666;margin-top:2px;}
+.btn-dl{padding:8px 16px;background:#005227;color:#fff;border:none;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s;}
+.btn-dl:hover{background:#003a1c;}
+.btn-new{display:block;width:100%;margin-top:14px;padding:12px;background:transparent;border:1px solid #00C93B;border-radius:10px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:#005227;cursor:pointer;transition:background .15s;}
+.btn-new:hover{background:#f0faf3;}
+.divider{border:none;border-top:0.5px solid #e8ede8;margin:22px 0;}
+.success-header{text-align:center;padding:24px 0 12px;}
+.success-icon{font-size:40px;}
+.success-title{font-size:17px;font-weight:700;color:#1a2e1f;margin-top:10px;}
+.success-sub{font-size:12px;color:#666;margin-top:4px;}
+@media(max-width:520px){.forn-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <div class="logo-dot">iG</div>
+    <div class="top-bar-info">
+      <h1 id="top-title">Sistema de Finalizados</h1>
+      <span id="top-sub">Selecione a fornecedora para começar</span>
+    </div>
+    <button class="top-bar-back" id="btn-back" onclick="goBack()">← Voltar</button>
+  </div>
+  <div class="body">
+
+    <!-- TELA 1: seleção -->
+    <div class="screen active" id="screen-select">
+      <div class="select-title">Selecione a fornecedora</div>
+      <div class="forn-grid">
+        <div class="forn-card" onclick="selectForn('gedisa')">
+          <div class="forn-icon" style="background:#e2f6e8;color:#005227;">GD</div>
+          <div><div class="forn-name">Gedisa <span class="badge-ok">ATIVO</span></div><div class="forn-sub">MA · Equatorial</div></div>
+        </div>
+        <div class="forn-card" onclick="selectForn('cotesa')">
+          <div class="forn-icon" style="background:#dbeafe;color:#1e40af;">CT</div>
+          <div><div class="forn-name">COTESA / MOVE <span class="badge-ok">ATIVO</span></div><div class="forn-sub">SC · RS · SP</div></div>
+        </div>
+        <div class="forn-card" onclick="selectForn('sunclick')">
+          <div class="forn-icon" style="background:#fef3c7;color:#92400e;">SK</div>
+          <div><div class="forn-name">Sunclick <span class="badge-ok">ATIVO</span></div><div class="forn-sub">CE · PA · RJ · ES · SS</div></div>
+        </div>
+        <div class="forn-card" onclick="selectForn('origo')">
+          <div class="forn-icon" style="background:#dcfce7;color:#166534;">OR</div>
+          <div><div class="forn-name">Origo <span class="badge-ok">ATIVO</span></div><div class="forn-sub">TO · PA · PE · BA · GO · MS</div></div>
+        </div>
+        <div class="forn-card disabled">
+          <div class="forn-icon" style="background:#fce7f3;color:#9d174d;">VT</div>
+          <div><div class="forn-name">Vantage <span class="badge-soon">EM BREVE</span></div><div class="forn-sub">SS · GO Equatorial</div></div>
+        </div>
+        <div class="forn-card disabled">
+          <div class="forn-icon" style="background:#ede9fe;color:#5b21b6;">KL</div>
+          <div><div class="forn-name">Kolmeia <span class="badge-soon">EM BREVE</span></div><div class="forn-sub">SC · PR · SP · RS</div></div>
+        </div>
+        <div class="forn-card disabled">
+          <div class="forn-icon" style="background:#f1f5f9;color:#475569;">MC</div>
+          <div><div class="forn-name">Moncarlo <span class="badge-soon">EM BREVE</span></div><div class="forn-sub">ES · RJ</div></div>
+        </div>
+        <div class="forn-card disabled">
+          <div class="forn-icon" style="background:#ffedd5;color:#9a3412;">RS</div>
+          <div><div class="forn-name">Reserva <span class="badge-soon">EM BREVE</span></div><div class="forn-sub">Elektro · CPFL · Energisa</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GEDISA -->
+    <div class="screen" id="screen-gedisa">
+      <div class="section-label">Planilha exportada do sistema iGreen</div>
+      <div class="drop-zone"><input type="file" id="g-fi" accept=".xlsx,.xls"><div class="drop-icon">📂</div><div class="drop-text">Clique para selecionar ou arraste aqui</div><div class="drop-sub">Exportação iGreen (.xlsx)</div><div class="file-ok" id="g-fn"></div></div>
+      <hr class="divider">
+      <div class="section-label">Consolidado anterior (opcional)</div>
+      <div class="toggle-row"><button class="toggle" id="g-tgl" onclick="tgl('g')"></button><span class="toggle-label">Tenho um consolidado anterior</span></div>
+      <div id="g-cs" style="display:none"><div class="drop-zone"><input type="file" id="g-fc" accept=".xlsx,.xls"><div class="drop-icon">📋</div><div class="drop-text">Consolidado semana anterior (formato Gedisa)</div><div class="drop-sub">Acumulado automaticamente</div><div class="file-ok" id="g-cn"></div></div></div>
+      <button class="btn-run" id="g-btn" onclick="rodar('gedisa')" disabled>Gerar planilhas Gedisa ↗</button>
+      <div class="status-box" id="g-st"></div>
+    </div>
+
+    <!-- COTESA -->
+    <div class="screen" id="screen-cotesa">
+      <div class="section-label">Planilha exportada do sistema iGreen</div>
+      <div class="drop-zone"><input type="file" id="c-fi" accept=".xlsx,.xls"><div class="drop-icon">📂</div><div class="drop-text">Clique para selecionar ou arraste aqui</div><div class="drop-sub">Exportação iGreen (.xlsx)</div><div class="file-ok" id="c-fn"></div></div>
+      <hr class="divider">
+      <div class="section-label">Número do lote</div>
+      <div class="param-item"><input type="text" id="c-lote" placeholder="Ex: Lote 11"><span class="param-hint">Aplicado a todos os clientes desta exportação</span></div>
+      <hr class="divider">
+      <div class="section-label">Regras aplicadas automaticamente</div>
+      <div class="rules-box">
+        <div class="rules-title">TX+ · GD · Bandeiras · Classificação B · Coluna M</div>
+        <div class="rule-row"><span class="tag">Monofásico</span>+30 kWh <span class="tag">Bifásico</span>+50 kWh <span class="tag">Trifásico</span>+100 kWh</div>
+        <div class="rule-row"><span class="tag">Autoconsumo</span>RGE, CELESC <span class="tag gd">GD</span>CEEE, Elektro, Copel · Bandeiras e coluna M calculados</div>
+      </div>
+      <hr class="divider">
+      <div class="section-label">Consolidado anterior (opcional)</div>
+      <div class="toggle-row"><button class="toggle" id="c-tgl" onclick="tgl('c')"></button><span class="toggle-label">Tenho um consolidado anterior</span></div>
+      <div id="c-cs" style="display:none"><div class="drop-zone"><input type="file" id="c-fc" accept=".xlsx,.xls"><div class="drop-icon">📋</div><div class="drop-text">Consolidado semana anterior</div><div class="drop-sub">Acumulado automaticamente</div><div class="file-ok" id="c-cn"></div></div></div>
+      <button class="btn-run" id="c-btn" onclick="rodar('cotesa')" disabled>Gerar planilha COTESA ↗</button>
+      <div class="status-box" id="c-st"></div>
+    </div>
+
+    <!-- SUNCLICK -->
+    <div class="screen" id="screen-sunclick">
+      <div class="section-label">Planilha exportada do sistema iGreen</div>
+      <div class="drop-zone"><input type="file" id="s-fi" accept=".xlsx,.xls"><div class="drop-icon">📂</div><div class="drop-text">Clique para selecionar ou arraste aqui</div><div class="drop-sub">Exportação iGreen (.xlsx)</div><div class="file-ok" id="s-fn"></div></div>
+      <hr class="divider">
+      <div class="section-label">Consolidado anterior (opcional)</div>
+      <div class="toggle-row"><button class="toggle" id="s-tgl" onclick="tgl('s')"></button><span class="toggle-label">Tenho um consolidado anterior</span></div>
+      <div id="s-cs" style="display:none"><div class="drop-zone"><input type="file" id="s-fc" accept=".xlsx,.xls"><div class="drop-icon">📋</div><div class="drop-text">Arquivo "Base Já enviada" da semana anterior</div><div class="drop-sub">Aba "Base Já enviada" será acumulada automaticamente</div><div class="file-ok" id="s-cn"></div></div></div>
+      <button class="btn-run" id="s-btn" onclick="rodar('sunclick')" disabled>Gerar planilhas Sunclick ↗</button>
+      <div class="status-box" id="s-st"></div>
+    </div>
+
+    <!-- ORIGO -->
+    <div class="screen" id="screen-origo">
+      <div class="section-label">Planilha exportada do sistema iGreen</div>
+      <div class="drop-zone"><input type="file" id="o-fi" accept=".xlsx,.xls"><div class="drop-icon">📂</div><div class="drop-text">Clique para selecionar ou arraste aqui</div><div class="drop-sub">Exportação iGreen (.xlsx)</div><div class="file-ok" id="o-fn"></div></div>
+      <hr class="divider">
+      <div class="section-label">Regras aplicadas automaticamente</div>
+      <div class="rules-box">
+        <div class="rules-title">Campos fixos</div>
+        <div class="rule-row"><span class="tag">Portabilidade</span>Não <span class="tag">Possui outro SGE</span>Não <span class="tag">Troca de Titularidade</span>Não</div>
+        <div class="rule-row"><span class="tag">Tipo Calculo Cota</span>em branco <span class="tag">Data ref. calculo</span>em branco</div>
+      </div>
+      <div class="rules-box" style="margin-top:10px">
+        <div class="rules-title">Campos calculados</div>
+        <div class="rule-row"><span class="tag">Tipo de Tarifa</span>Residencial → B1 · Industrial/Rural → B2 · Comercial → B3</div>
+        <div class="rule-row"><span class="tag">Disponibilidade</span>Monofásico / Bifásico / Trifásico extraído do campo Classificacao</div>
+        <div class="rule-row"><span class="tag">Colunas 01–12</span>Média de consumo repetida nos 12 meses</div>
+        <div class="rule-row"><span class="tag">Ciclo Referência</span>Data Emissão Fatura no formato abr/26</div>
+      </div>
+      <hr class="divider">
+      <div class="section-label">Consolidado anterior (opcional)</div>
+      <div class="toggle-row"><button class="toggle" id="o-tgl" onclick="tgl('o')"></button><span class="toggle-label">Tenho um consolidado anterior</span></div>
+      <div id="o-cs" style="display:none"><div class="drop-zone"><input type="file" id="o-fc" accept=".xlsx,.xls"><div class="drop-icon">📋</div><div class="drop-text">Planilha Origo enviada anteriormente</div><div class="drop-sub">Linhas anteriores serão acumuladas</div><div class="file-ok" id="o-cn"></div></div></div>
+      <button class="btn-run" id="o-btn" onclick="rodar('origo')" disabled>Gerar planilha Origo ↗</button>
+      <div class="status-box" id="o-st"></div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="screen" id="screen-result">
+      <div class="success-header"><div class="success-icon">✅</div><div class="success-title" id="res-title">Planilhas geradas!</div><div class="success-sub" id="res-sub">Clique para baixar</div></div>
+      <hr class="divider">
+      <div id="res-cards"></div>
+      <button class="btn-new" onclick="goBack();goHome()">← Gerar outra planilha</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const S={g:{igreen:null,consol:null,on:false},c:{igreen:null,consol:null,on:false},s:{igreen:null,consol:null,on:false},o:{igreen:null,consol:null,on:false}};
+
+function selectForn(f){
+  const names={gedisa:'Gedisa',cotesa:'COTESA / MOVE',sunclick:'Sunclick',origo:'Origo'};
+  const subs={gedisa:'MA · Equatorial',cotesa:'SC · RS · SP',sunclick:'CE · PA · RJ · ES · SS',origo:'TO · PA · PE · BA · GO · MS'};
+  document.getElementById('top-title').textContent=names[f];
+  document.getElementById('top-sub').textContent=subs[f];
+  document.getElementById('btn-back').style.display='block';
+  show('screen-'+f);
+}
+function goBack(){
+  document.getElementById('top-title').textContent='Sistema de Finalizados';
+  document.getElementById('top-sub').textContent='Selecione a fornecedora para começar';
+  document.getElementById('btn-back').style.display='none';
+  show('screen-select');
+}
+function goHome(){['g-st','c-st','s-st','o-st'].forEach(id=>{const e=document.getElementById(id);e.className='status-box';e.textContent='';});}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function bindFile(inputId,stateObj,key,fnId,checkFn){
+  document.getElementById(inputId).addEventListener('change',function(e){
+    const f=e.target.files[0];if(!f)return;
+    document.getElementById(fnId).textContent='✔ '+f.name;
+    const r=new FileReader();
+    r.onload=ev=>{stateObj[key]=XLSX.read(ev.target.result,{type:'array',cellDates:true});checkFn();};
+    r.readAsArrayBuffer(f);
+  });
+}
+bindFile('g-fi',S.g,'igreen','g-fn',()=>chk('g'));
+bindFile('g-fc',S.g,'consol','g-cn',()=>chk('g'));
+bindFile('c-fi',S.c,'igreen','c-fn',()=>chk('c'));
+bindFile('c-fc',S.c,'consol','c-cn',()=>chk('c'));
+bindFile('s-fi',S.s,'igreen','s-fn',()=>chk('s'));
+bindFile('s-fc',S.s,'consol','s-cn',()=>chk('s'));
+bindFile('o-fi',S.o,'igreen','o-fn',()=>chk('o'));
+bindFile('o-fc',S.o,'consol','o-cn',()=>chk('o'));
+
+function chk(p){const st=S[p];document.getElementById(p+'-btn').disabled=!st.igreen||(st.on&&!st.consol);}
+function tgl(p){const st=S[p];st.on=!st.on;document.getElementById(p+'-tgl').classList.toggle('on',st.on);document.getElementById(p+'-cs').style.display=st.on?'block':'none';if(!st.on)st.consol=null;chk(p);}
+
+function parseDate(v){if(!v)return null;if(v instanceof Date)return isNaN(v)?null:v;if(typeof v==='string'){const d=new Date(v);return isNaN(d)?null:d;}return null;}
+function fmtDate(v){const d=parseDate(v);if(!d)return '';return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;}
+function getToday(){return fmtDate(new Date()).replace(/\//g,'-');}
+function readIGreen(wb){
+  const sname=wb.SheetNames.includes('Items')?'Items':wb.SheetNames.includes('Base Nova')?'Base Nova':wb.SheetNames[0];
+  const raw=XLSX.utils.sheet_to_json(wb.Sheets[sname],{header:1,defval:'',raw:false});
+  if(!raw||raw.length<2)return[];
+  const H=raw[0];
+  return raw.slice(1).filter(r=>r.some(v=>v!==''&&v!==null)).map(r=>{const o={};H.forEach((h,i)=>{if(h)o[h]=r[i];});return o;});
+}
+function wbToBlob(wb){return new Blob([XLSX.write(wb,{type:'array',bookType:'xlsx'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();}
+function setStatus(id,msg,type){const e=document.getElementById(id);e.textContent=msg;e.className='status-box '+type;}
+function showResults(title,sub,cards){
+  document.getElementById('res-title').textContent=title;
+  document.getElementById('res-sub').textContent=sub;
+  const c=document.getElementById('res-cards');c.innerHTML='';
+  cards.forEach(card=>{
+    const d=document.createElement('div');d.className='result-card';
+    d.innerHTML=`<div><div class="rc-title">${card.name}</div><div class="rc-sub">${card.sub}</div></div><button class="btn-dl" id="dl-${card.id}">Baixar</button>`;
+    c.appendChild(d);document.getElementById('dl-'+card.id).onclick=()=>dl(card.blob,card.name);
+  });
+  document.getElementById('top-title').textContent='Planilhas prontas!';
+  document.getElementById('top-sub').textContent='Baixe os arquivos abaixo';
+  show('screen-result');
+}
+
+// ── GEDISA ──────────────────────────────────────────────────────────────────
+function gedisaClassif(c){if(!c)return'B1';const s=c.toLowerCase();if(s.includes('rural')||s.includes('industrial'))return'B2';if(s.includes('comercial'))return'B3';return'B1';}
+function buildGedisaRow(src){
+  const v=k=>src[k]!=null?src[k]:'';const pj=!!(v('Cnpj')||v('Razao'));
+  return[v('Instalacao'),'ATIVO',v('Regiao'),pj?'PJ':'PF',v('Nome'),gedisaClassif(v('Classificacao')),'Não','Não','N/A','N/A',v('Media Consumo'),'','','',v('Cep'),v('Complemento'),v('Numero'),v('Endereco'),v('Bairro'),v('UF Consumo'),v('Cidade'),pj?v('Razao'):'',pj?v('Fantasia'):'',pj?v('Cnpj'):'',v('Email'),v('Celular'),v('Celular'),v('Cep'),v('Endereco'),v('Numero'),v('Bairro'),v('Complemento'),v('UF Consumo'),v('Cidade'),v('Nome'),v('Cpf'),v('Data Nascimento')?fmtDate(v('Data Nascimento')):'',v('Profissao')||'N/A',v('Estadocivil')||'N/A',v('Email'),v('Celular'),v('Celular'),v('Cep'),v('Endereco'),v('Numero'),v('Bairro'),v('Complemento'),v('UF Consumo'),v('Cidade'),v('Desconto Cliente'),''];
+}
+const G_L1=['Unidade Consumidora','','','','','','','','','','','','','','','','','','','','','Empresa','','','','','','','','','','','','','Responsáveis','','','','','','','','','','','','','','','Desconto',''];
+const G_L2=['Número UC','STATUS','Distribuidora','Titular PF ou PJ','Nome titular da fatura','Grupo de consumo (B3, B1 etc)','Tem outro tipo de geração?','Tem placa fotovoltaica?','Média de geração da placa fotovoltaica','Outro fornecedor de GD','Histórico de consumo','Data leitura','Data emissão','Data vencimento','CEP','Complemento','Número endereço','Logradouro','Bairro','Estado','Cidade','Razão social','Nome fantasia','CNPJ','e-mail','celular','telefone','CEP','Logradouro','Número','Bairro','Complemento','UF','Cidade','Nome','CPF','Data de Nascimento','Qualificação','Estado civil','e-mail','celular','telefone','CEP','Logradouro','Número','Bairro','Complemento','UF','Cidade','Percentual',''];
+function buildGedisaWB(rows){const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([G_L1,G_L2,...rows]);ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:20}},{s:{r:0,c:21},e:{r:0,c:33}},{s:{r:0,c:34},e:{r:0,c:48}},{s:{r:0,c:49},e:{r:0,c:50}}];ws['!cols']=G_L2.map(c=>({wch:Math.max(14,(c||'').length+2)}));XLSX.utils.book_append_sheet(wb,ws,'Base');return wb;}
+
+// ── COTESA ──────────────────────────────────────────────────────────────────
+function getTX(c,m){if(!c)return m+30;const s=c.toLowerCase();if(s.includes('trifás')||s.includes('trifas'))return m+100;if(s.includes('bifás')||s.includes('bifas'))return m+50;return m+30;}
+function getB(c){if(!c)return'B1';const s=c.toLowerCase();if(s.includes('industrial')||s.includes('rural'))return'B2';if(s.includes('comercial'))return'B3';return'B1';}
+function getGD(r){const u=(r||'').toUpperCase();if(u.includes('CEEE')||u.includes('ELEKTRO')||u.includes('COPEL'))return'GD';return'Autoconsumo';}
+function getBand(gd,r,d){const v=parseFloat(d)||10;const elk=(r||'').toUpperCase().includes('ELEKTRO');if(gd==='Autoconsumo'||elk){const x=v/100;return[x,x,x,x];}return[0.08,0.10,0.12,0.14];}
+function getM(de,dv){const a=parseDate(de),b=parseDate(dv);if(!a||!b)return'M+1';const d=(b.getFullYear()*12+b.getMonth())-(a.getFullYear()*12+a.getMonth());if(d<=0)return'M';return d===1?'M+1':d===2?'M+2':`M+${d}`;}
+const C_H=['Lote','Codigo','Nome','Instalacao','Celular','Cidade','Regiao','Data Ativo','Media Consumo','TX+ Consumo','Data Cadastro','Cpf','Numero Cliente','Email','Rg','Orgao Emissor','Cep','Endereco','Numero','Bairro','Complemento','Cnpj','Razao','Fantasia','UF Consumo','Classificacao','Link Documentos','Link Conta Energia','Link Cartao CNPJ','Link Documento Frente','Link Documento Verso','Link Conta Energia 2','Link Contrato Social','Link Comprovante De Pagamento','Link Estatuto Convencao','Senha Pdf','Fornecedora','Desconto Cliente','Data Nascimento','Login Distribuidora','Senha Distribuidora','Cliente','Representante','Nacionalidade','Profissao','Estadocivil','Codigo','Data Leitura Fatura Atual','Data Emissao Fatura','Data Vencimento Fatura','Classificação','M','GD','Bandeira verde','Banderira amarela','Bandeira vermelha 1','Bandeira Vermelha 2'];
+function buildCotesaRow(src,lote){const v=k=>src[k]!=null?src[k]:'';const m=parseFloat(v('Media Consumo'))||0,cl=v('Classificacao'),rg=v('Regiao'),dc=v('Desconto Cliente');const gd=getGD(rg),bd=getBand(gd,rg,dc),de=v('Data Emissao Fatura'),dv=v('Data Vencimento Fatura');return[lote,v('Codigo'),v('Nome'),v('Instalacao'),v('Celular'),v('Cidade'),rg,fmtDate(v('Data Ativo')),m,getTX(cl,m),fmtDate(v('Data Cadastro')),v('Cpf'),v('Numero Cliente')||v('Instalacao'),v('Email'),v('Rg'),v('Orgao Emissor'),v('Cep'),v('Endereco'),v('Numero'),v('Bairro'),v('Complemento'),v('Cnpj'),v('Razao'),v('Fantasia'),v('UF Consumo'),cl,v('Link Documentos')||v('Link Documento'),v('Link Conta Energia'),v('Link Cartao CNPJ'),v('Link Documento Frente'),v('Link Documento Verso'),v('Link Conta Energia 2'),v('Link Contrato Social'),v('Link Comprovante De Pagamento'),v('Link Estatuto Convencao'),v('Senha Pdf'),v('Fornecedora')||'COTESA',dc,fmtDate(v('Data Nascimento')),v('Login Distribuidora'),v('Senha Distribuidora'),v('Cliente')||v('Nome'),v('Representante'),v('Nacionalidade'),v('Profissao'),v('Estadocivil'),v('Codigo'),fmtDate(v('Data Leitura Fatura Atual')||v('Data Proxima Leitura')),fmtDate(de),fmtDate(dv),getB(cl),getM(de,dv),gd,bd[0],bd[1],bd[2],bd[3]];}
+function buildCotesaWB(rows){const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([C_H,...rows]);ws['!cols']=C_H.map(h=>({wch:Math.max(12,h.length+2)}));XLSX.utils.book_append_sheet(wb,ws,'Planilha1');return wb;}
+
+// ── SUNCLICK ─────────────────────────────────────────────────────────────────
+const SK_H=['Data','Codigo','Nome','Instalacao','Conta Contrato','Celular','Cidade','Regiao','Data Ativo','Media Consumo','Data Cadastro','Cpf','Numero Cliente','Email','Rg','Orgao Emissor','Cep','Endereco','Numero','Bairro','Complemento','Cnpj','Razao','Fantasia','UF Consumo','Classificacao','Link Documento','Link Conta Energia','Link Cartao CNPJ','Link Documento Frente','Link Documento Verso','Link Conta Energia 2','Link Contrato Social','Link Comprovante De Pagamento','Link Estatuto Convencao','Senha Pdf','Fornecedora','Desconto Cliente','Data Nascimento','Login Distribuidora','Senha Distribuidora','Cliente','Representante','Nacionalidade','Profissao','Estadocivil'];
+function buildSunclickRow(src){const v=k=>src[k]!=null?src[k]:'';return[v('Data Cadastro')?fmtDate(v('Data Cadastro')):'',v('Codigo'),v('Nome'),v('Instalacao'),v('Conta Contrato'),v('Celular'),v('Cidade'),v('Regiao'),v('Data Ativo')?fmtDate(v('Data Ativo')):'',v('Media Consumo'),v('Data Cadastro')?fmtDate(v('Data Cadastro')):'',v('Cpf'),v('Numero Cliente')||v('Instalacao'),v('Email'),v('Rg'),v('Orgao Emissor'),v('Cep'),v('Endereco'),v('Numero'),v('Bairro'),v('Complemento'),v('Cnpj'),v('Razao'),v('Fantasia'),v('UF Consumo'),v('Classificacao'),v('Link Documentos')||v('Link Documento'),v('Link Conta Energia'),v('Link Cartao CNPJ'),v('Link Documento Frente'),v('Link Documento Verso'),v('Link Conta Energia 2'),v('Link Contrato Social'),v('Link Comprovante De Pagamento'),v('Link Estatuto Convencao'),v('Senha Pdf'),v('Fornecedora')||'SUNCLICK',v('Desconto Cliente'),v('Data Nascimento')?fmtDate(v('Data Nascimento')):'',v('Login Distribuidora'),v('Senha Distribuidora'),v('Cliente')||v('Nome'),v('Representante'),v('Nacionalidade'),v('Profissao'),v('Estadocivil')];}
+function buildSunclickWB(novoRows,consolRows){const wb=XLSX.utils.book_new();const wsN=XLSX.utils.aoa_to_sheet([SK_H,...novoRows]);wsN['!cols']=SK_H.map(h=>({wch:Math.max(12,h.length+2)}));XLSX.utils.book_append_sheet(wb,wsN,'Base nova');const wsC=XLSX.utils.aoa_to_sheet([SK_H,...consolRows]);wsC['!cols']=SK_H.map(h=>({wch:Math.max(12,h.length+2)}));XLSX.utils.book_append_sheet(wb,wsC,'Base Já enviada');return wb;}
+
+// ── ORIGO ─────────────────────────────────────────────────────────────────────
+const MESES_PT=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+function fmtCiclo(v){const d=parseDate(v);if(!d)return '';return `${MESES_PT[d.getMonth()]}/${String(d.getFullYear()).slice(-2)}`;}
+function getDisponibilidade(c){if(!c)return'Monofásico';const s=c.toLowerCase();if(s.includes('trifás')||s.includes('trifas'))return'Trifásico';if(s.includes('bifás')||s.includes('bifas'))return'Bifásico';return'Monofásico';}
+function getSubclasse(c){if(!c)return'RESIDENCIAL';const s=c.toLowerCase();if(s.includes('rural'))return'RURAL';if(s.includes('industrial'))return'INDUSTRIAL';if(s.includes('comercial'))return'COMERCIAL';return'RESIDENCIAL';}
+function getDistribuidora(regiao){if(!regiao)return'';const r=regiao.toUpperCase();if(r.includes('EQUATORIAL'))return'EQUATORIAL';if(r.includes('ENERGISA'))return'ENERGISA';if(r.includes('COPEL'))return'COPEL';if(r.includes('CEMIG'))return'CEMIG';if(r.includes('CELPE'))return'CELPE';if(r.includes('COELBA')||r.includes('NEOENERGIA'))return'NEOENERGIA COELBA';return regiao;}
+const O_H=[null,'Cliente Atual','Unidade Consumidora','Distribuidora','Portabilidade','Possui outro SGE','Tipo de Tarifa','Disponibilidade','Subclasse','Número do Cliente','Nome do Titular da Conta de Energia','CPF e CNPJ da Conta de Energia','Representante legal (CNPJ)','Email','Data Nascimento','Profissão','Telefone','Troca de Titularidade','CEP','Logradouro','Número','Bairro','Estado','Cidade','Ciclo Referência','Tipo de Calculo de Cota','Data de referência para calculo','01','02','03','04','05','06','07','08','09','10','11','12'];
+function buildOrigoRow(src){
+  const v=k=>src[k]!=null?src[k]:'';
+  const classif=v('Classificacao');const media=parseFloat(v('Media Consumo'))||0;
+  const pj=!!(v('Cnpj')||v('Razao'));const nome=pj?v('Razao')||v('Nome'):v('Nome');
+  const cpf=pj?v('Cnpj'):v('Cpf');const repLegal=pj?v('Cpf'):'';
+  return[null,nome,v('Instalacao'),getDistribuidora(v('Regiao')),'Não','Não',getB(classif),getDisponibilidade(classif),getSubclasse(classif),v('Numero Cliente')||v('Instalacao'),nome,cpf,repLegal,v('Email'),v('Data Nascimento')?fmtDate(v('Data Nascimento')):'',v('Profissao')||'',v('Celular'),'Não',v('Cep'),v('Endereco'),v('Numero'),v('Bairro'),v('UF Consumo'),v('Cidade'),fmtCiclo(v('Data Emissao Fatura')),'','',media,media,media,media,media,media,media,media,media,media,media,media];
+}
+function buildOrigoWB(rows){const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([O_H,...rows]);ws['!cols']=O_H.map(h=>({wch:Math.max(14,(h||'').length+2)}));XLSX.utils.book_append_sheet(wb,ws,'Unidades Consumidora criaçã...');return wb;}
+
+// ── RODAR ────────────────────────────────────────────────────────────────────
+function rodar(forn){
+  const p=forn[0];const stId=p+'-st';
+  try{
+    setStatus(stId,'Processando...','info');
+    const today=getToday();const cards=[];
+
+    if(forn==='gedisa'){
+      const rows=readIGreen(S.g.igreen).map(buildGedisaRow);
+      if(!rows.length){setStatus(stId,'Nenhum cliente encontrado.','error');return;}
+      cards.push({id:'gn',name:`Novos_Gedisa_${today}.xlsx`,sub:`${rows.length} clientes · enviar esta semana`,blob:wbToBlob(buildGedisaWB(rows))});
+      if(S.g.on&&S.g.consol){const cWS=S.g.consol.Sheets[S.g.consol.SheetNames[0]];const cRaw=XLSX.utils.sheet_to_json(cWS,{header:1,defval:'',raw:false});const prev=cRaw.length>2?cRaw.slice(2):[];const tot=[...prev,...rows];cards.push({id:'gc',name:`Consolidado_Gedisa_${today}.xlsx`,sub:`${tot.length} clientes total`,blob:wbToBlob(buildGedisaWB(tot))});}
+      showResults(`Gedisa · ${rows.length} clientes processados`,'Prontos para envio',cards);
+
+    }else if(forn==='cotesa'){
+      const lote=document.getElementById('c-lote').value.trim()||'Lote';
+      const rows=readIGreen(S.c.igreen).map(s=>buildCotesaRow(s,lote));
+      if(!rows.length){setStatus(stId,'Nenhum cliente encontrado.','error');return;}
+      const ln=lote.replace(/\s+/g,'_');
+      cards.push({id:'cn',name:`COTESA_${ln}_${today}.xlsx`,sub:`${rows.length} clientes · ${lote}`,blob:wbToBlob(buildCotesaWB(rows))});
+      if(S.c.on&&S.c.consol){const cWS=S.c.consol.Sheets[S.c.consol.SheetNames[0]];const cRaw=XLSX.utils.sheet_to_json(cWS,{header:1,defval:'',raw:false});const tot=[...(cRaw.length>1?cRaw.slice(1):[]),...rows];cards.push({id:'cc',name:`COTESA_Consolidado_${today}.xlsx`,sub:`${tot.length} clientes total`,blob:wbToBlob(buildCotesaWB(tot))});}
+      showResults(`COTESA · ${rows.length} clientes processados`,'Pronto para envio',cards);
+
+    }else if(forn==='sunclick'){
+      const novoRows=readIGreen(S.s.igreen).map(buildSunclickRow);
+      if(!novoRows.length){setStatus(stId,'Nenhum cliente encontrado.','error');return;}
+      let consolRows=[...novoRows];
+      if(S.s.on&&S.s.consol){const prevWB=S.s.consol;const shJ=prevWB.SheetNames.find(n=>n.toLowerCase().includes('enviada'))||prevWB.SheetNames[0];const cRaw=XLSX.utils.sheet_to_json(prevWB.Sheets[shJ],{header:1,defval:'',raw:false});consolRows=[...(cRaw.length>1?cRaw.slice(1):[]),...novoRows];}
+      cards.push({id:'sn',name:`Sunclick_${today}.xlsx`,sub:`${novoRows.length} novos · ${consolRows.length} no consolidado`,blob:wbToBlob(buildSunclickWB(novoRows,consolRows))});
+      showResults(`Sunclick · ${novoRows.length} clientes processados`,'2 abas no arquivo',cards);
+
+    }else if(forn==='origo'){
+      const rows=readIGreen(S.o.igreen).map(buildOrigoRow);
+      if(!rows.length){setStatus(stId,'Nenhum cliente encontrado.','error');return;}
+      let allRows=[...rows];
+      if(S.o.on&&S.o.consol){const cWS=S.o.consol.Sheets[S.o.consol.SheetNames[0]];const cRaw=XLSX.utils.sheet_to_json(cWS,{header:1,defval:'',raw:false});const prev=cRaw.length>1?cRaw.slice(1):[];allRows=[...prev,...rows];}
+      cards.push({id:'on',name:`Origo_${today}.xlsx`,sub:`${rows.length} novos · ${allRows.length} no total`,blob:wbToBlob(buildOrigoWB(allRows))});
+      showResults(`Origo · ${rows.length} clientes processados`,'Pronto para envio',cards);
+    }
+
+  }catch(e){setStatus(stId,'Erro: '+e.message,'error');}
+}
+</script>
+</body>
+</html>
