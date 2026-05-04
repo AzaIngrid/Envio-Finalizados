@@ -103,9 +103,9 @@ body{font-family:'Montserrat',sans-serif;background:#f5f7f5;min-height:100vh;dis
           <div class="forn-icon" style="background:#dcfce7;color:#166534;">OR</div>
           <div><div class="forn-name">Origo <span class="badge-ok">ATIVO</span></div><div class="forn-sub">TO · PA · PE · BA · GO · MS</div></div>
         </div>
-        <div class="forn-card disabled">
+        <div class="forn-card" onclick="selectForn('vantage')">
           <div class="forn-icon" style="background:#fce7f3;color:#9d174d;">VT</div>
-          <div><div class="forn-name">Vantage <span class="badge-soon">EM BREVE</span></div><div class="forn-sub">SS · GO Equatorial</div></div>
+          <div><div class="forn-name">Vantage <span class="badge-ok">ATIVO</span></div><div class="forn-sub">GO · SS · Equatorial</div></div>
         </div>
         <div class="forn-card disabled">
           <div class="forn-icon" style="background:#ede9fe;color:#5b21b6;">KL</div>
@@ -194,6 +194,18 @@ body{font-family:'Montserrat',sans-serif;background:#f5f7f5;min-height:100vh;dis
       <div class="status-box" id="o-st"></div>
     </div>
 
+    <!-- VANTAGE -->
+    <div class="screen" id="screen-vantage">
+      <div class="section-label">Planilha exportada do sistema iGreen</div>
+      <div class="drop-zone"><input type="file" id="vt-fi" accept=".xlsx,.xls"><div class="drop-icon">📂</div><div class="drop-text">Clique para selecionar ou arraste aqui</div><div class="drop-sub">Exportação iGreen (.xlsx)</div><div class="file-ok" id="vt-fn"></div></div>
+      <hr class="divider">
+      <div class="section-label">Consolidado anterior (opcional)</div>
+      <div class="toggle-row"><button class="toggle" id="vt-tgl" onclick="tgl('vt')"></button><span class="toggle-label">Tenho um consolidado anterior</span></div>
+      <div id="vt-cs" style="display:none"><div class="drop-zone"><input type="file" id="vt-fc" accept=".xlsx,.xls"><div class="drop-icon">📋</div><div class="drop-text">Arquivo "Base enviada" da semana anterior</div><div class="drop-sub">Aba "Base enviada" será acumulada automaticamente</div><div class="file-ok" id="vt-cn"></div></div></div>
+      <button class="btn-run" id="vt-btn" onclick="rodar('vantage')" disabled>Gerar planilhas Vantage ↗</button>
+      <div class="status-box" id="vt-st"></div>
+    </div>
+
     <!-- RESULTADO -->
     <div class="screen" id="screen-result">
       <div class="success-header"><div class="success-icon">✅</div><div class="success-title" id="res-title">Planilhas geradas!</div><div class="success-sub" id="res-sub">Clique para baixar</div></div>
@@ -207,11 +219,11 @@ body{font-family:'Montserrat',sans-serif;background:#f5f7f5;min-height:100vh;dis
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-const S={g:{igreen:null,consol:null,on:false},c:{igreen:null,consol:null,on:false},s:{igreen:null,consol:null,on:false},o:{igreen:null,consol:null,on:false}};
+const S={g:{igreen:null,consol:null,on:false},c:{igreen:null,consol:null,on:false},s:{igreen:null,consol:null,on:false},o:{igreen:null,consol:null,on:false},vt:{igreen:null,consol:null,on:false}};
 
 function selectForn(f){
-  const names={gedisa:'Gedisa',cotesa:'COTESA / MOVE',sunclick:'Sunclick',origo:'Origo'};
-  const subs={gedisa:'MA · Equatorial',cotesa:'SC · RS · SP',sunclick:'CE · PA · RJ · ES · SS',origo:'TO · PA · PE · BA · GO · MS'};
+  const names={gedisa:'Gedisa',cotesa:'COTESA / MOVE',sunclick:'Sunclick',origo:'Origo',vantage:'Vantage'};
+  const subs={gedisa:'MA · Equatorial',cotesa:'SC · RS · SP',sunclick:'CE · PA · RJ · ES · SS',origo:'TO · PA · PE · BA · GO · MS',vantage:'GO · SS · Equatorial'};
   document.getElementById('top-title').textContent=names[f];
   document.getElementById('top-sub').textContent=subs[f];
   document.getElementById('btn-back').style.display='block';
@@ -223,7 +235,7 @@ function goBack(){
   document.getElementById('btn-back').style.display='none';
   show('screen-select');
 }
-function goHome(){['g-st','c-st','s-st','o-st'].forEach(id=>{const e=document.getElementById(id);e.className='status-box';e.textContent='';});}
+function goHome(){['g-st','c-st','s-st','o-st','vt-st'].forEach(id=>{const e=document.getElementById(id);e.className='status-box';e.textContent='';});}
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
 function bindFile(inputId,stateObj,key,fnId,checkFn){
@@ -243,6 +255,8 @@ bindFile('s-fi',S.s,'igreen','s-fn',()=>chk('s'));
 bindFile('s-fc',S.s,'consol','s-cn',()=>chk('s'));
 bindFile('o-fi',S.o,'igreen','o-fn',()=>chk('o'));
 bindFile('o-fc',S.o,'consol','o-cn',()=>chk('o'));
+bindFile('vt-fi',S.vt,'igreen','vt-fn',()=>chk('vt'));
+bindFile('vt-fc',S.vt,'consol','vt-cn',()=>chk('vt'));
 
 function chk(p){const st=S[p];document.getElementById(p+'-btn').disabled=!st.igreen||(st.on&&!st.consol);}
 function tgl(p){const st=S[p];st.on=!st.on;document.getElementById(p+'-tgl').classList.toggle('on',st.on);document.getElementById(p+'-cs').style.display=st.on?'block':'none';if(!st.on)st.consol=null;chk(p);}
@@ -315,6 +329,12 @@ function buildOrigoRow(src){
 }
 function buildOrigoWB(rows){const wb=XLSX.utils.book_new();const ws=XLSX.utils.aoa_to_sheet([O_H,...rows]);ws['!cols']=O_H.map(h=>({wch:Math.max(14,(h||'').length+2)}));XLSX.utils.book_append_sheet(wb,ws,'Unidades Consumidora criaçã...');return wb;}
 
+// ── VANTAGE ──────────────────────────────────────────────────────────────────
+// Estrutura idêntica à Sunclick — mesmas colunas, abas "Base enviada" e "Base Nova"
+const VT_H=['Data','Codigo','Nome','Instalacao','Celular','Cidade','Regiao','Data Ativo','Media Consumo','Data Cadastro','Cpf','Numero Cliente','Email','Rg','Orgao Emissor','Cep','Endereco','Numero','Bairro','Complemento','Cnpj','Razao','Fantasia','UF Consumo','Classificacao','Link Documentos','Link Conta Energia','Link Cartao CNPJ','Link Documento Frente','Link Documento Verso','Link Conta Energia 2','Link Contrato Social','Link Comprovante De Pagamento','Link Estatuto Convencao','Senha Pdf','Fornecedora','Desconto Cliente','Data Nascimento','Login Distribuidora','Senha Distribuidora','Cliente','Representante','Nacionalidade','Profissao','Estadocivil'];
+function buildVantageRow(src){const v=k=>src[k]!=null?src[k]:'';return[v('Data Cadastro')?fmtDate(v('Data Cadastro')):'',v('Codigo'),v('Nome'),v('Instalacao'),v('Celular'),v('Cidade'),v('Regiao'),v('Data Ativo')?fmtDate(v('Data Ativo')):'',v('Media Consumo'),v('Data Cadastro')?fmtDate(v('Data Cadastro')):'',v('Cpf'),v('Numero Cliente')||v('Instalacao'),v('Email'),v('Rg'),v('Orgao Emissor'),v('Cep'),v('Endereco'),v('Numero'),v('Bairro'),v('Complemento'),v('Cnpj'),v('Razao'),v('Fantasia'),v('UF Consumo'),v('Classificacao'),v('Link Documentos')||v('Link Documento'),v('Link Conta Energia'),v('Link Cartao CNPJ'),v('Link Documento Frente'),v('Link Documento Verso'),v('Link Conta Energia 2'),v('Link Contrato Social'),v('Link Comprovante De Pagamento'),v('Link Estatuto Convencao'),v('Senha Pdf'),v('Fornecedora')||'VANTAGE',v('Desconto Cliente'),v('Data Nascimento')?fmtDate(v('Data Nascimento')):'',v('Login Distribuidora'),v('Senha Distribuidora'),v('Cliente')||v('Nome'),v('Representante'),v('Nacionalidade'),v('Profissao'),v('Estadocivil')];}
+function buildVantageWB(novoRows,consolRows){const wb=XLSX.utils.book_new();const wsN=XLSX.utils.aoa_to_sheet([VT_H,...novoRows]);wsN['!cols']=VT_H.map(h=>({wch:Math.max(12,h.length+2)}));XLSX.utils.book_append_sheet(wb,wsN,'Base Nova');const wsC=XLSX.utils.aoa_to_sheet([VT_H,...consolRows]);wsC['!cols']=VT_H.map(h=>({wch:Math.max(12,h.length+2)}));XLSX.utils.book_append_sheet(wb,wsC,'Base enviada');return wb;}
+
 // ── RODAR ────────────────────────────────────────────────────────────────────
 function rodar(forn){
   const p=forn[0];const stId=p+'-st';
@@ -353,6 +373,15 @@ function rodar(forn){
       if(S.o.on&&S.o.consol){const cWS=S.o.consol.Sheets[S.o.consol.SheetNames[0]];const cRaw=XLSX.utils.sheet_to_json(cWS,{header:1,defval:'',raw:false});const prev=cRaw.length>1?cRaw.slice(1):[];allRows=[...prev,...rows];}
       cards.push({id:'on',name:`Origo_${today}.xlsx`,sub:`${rows.length} novos · ${allRows.length} no total`,blob:wbToBlob(buildOrigoWB(allRows))});
       showResults(`Origo · ${rows.length} clientes processados`,'Pronto para envio',cards);
+    }
+
+    }else if(forn==='vantage'){
+      const novoRows=readIGreen(S.vt.igreen).map(buildVantageRow);
+      if(!novoRows.length){setStatus(stId,'Nenhum cliente encontrado.','error');return;}
+      let consolRows=[...novoRows];
+      if(S.vt.on&&S.vt.consol){const prevWB=S.vt.consol;const shJ=prevWB.SheetNames.find(n=>n.toLowerCase().includes('enviada'))||prevWB.SheetNames[0];const cRaw=XLSX.utils.sheet_to_json(prevWB.Sheets[shJ],{header:1,defval:'',raw:false});consolRows=[...(cRaw.length>1?cRaw.slice(1):[]),...novoRows];}
+      cards.push({id:'vtn',name:`Vantage_${today}.xlsx`,sub:`${novoRows.length} novos · ${consolRows.length} no consolidado`,blob:wbToBlob(buildVantageWB(novoRows,consolRows))});
+      showResults(`Vantage · ${novoRows.length} clientes processados`,'2 abas no arquivo',cards);
     }
 
   }catch(e){setStatus(stId,'Erro: '+e.message,'error');}
